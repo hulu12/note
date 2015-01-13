@@ -1,0 +1,152 @@
+
+
+注意：
+1、最后一条声明可以没有分号，但是为了以后修改方便，一般也加上分号。
+2、为了使用样式更加容易阅读，可以将每条代码写在一个新行内，如下所示：
+
+
+
+1、写的位置
+	 <p style="color:red">这里文字是红色。</p>
+
+	 <style type="text/css">
+	p{
+	   font-size:20px;/*设置文字字号*/
+	   color:red;/*设置文字颜色*/
+	   font-weight:bold;/*设置字体加粗*/
+	}
+	</style>
+
+	<link href="base.css" rel="stylesheet" type="text/css" />
+		注意：
+	1、css样式文件名称以有意义的英文字母命名，如 main.css。
+	2、rel="stylesheet" type="text/css" 是固定写法不可修改。
+	3、<link>标签位置一般写在<head>标签之内。
+    
+    内联式 > 嵌入式 > 外部式
+
+    但是嵌入式>外部式有一个前提：嵌入式css样式的位置一定在外部式的后面。如右代码编辑器就是这样，<link href="style.css" ...>代码在<style type="text/css">...</style>代码的前面（实际开发中也是这么写的）
+2、标签选择器
+h1{
+font-weight:normal;
+color:red;
+}
+3、.类选器名称{css样式代码;}
+<span class="stress">胆小如鼠</span>
+4、ID选择器
+在很多方面，ID选择器都类似于类选择符，但也有一些重要的区别：
+1、为标签设置id="ID名称"，而不是class="类名称"。
+2、ID选择符的前面是井号（#）号，而不是英文圆点（.）。
+右侧代码编辑器中就是一个ID选择符的完整实例。
+
+5、类和ID选择器的区别
+相同点：可以应用于任何元素
+不同点：
+1、ID选择器只能在文档中使用一次。与类选择器不同，在一个HTML文档中，ID选择器只能使用一次，而且仅一次。而类选择器可以使用多次。
+2、可以使用类选择器词列表方法为一个元素同时设置多个样式。我们可以为一个元素同时设多个样式，但只可以用类选择器的方法实现，ID选择器是不可以的（不能使用 ID 词列表）。
+<p>到了<span class="stress bigsize">三年级</span>搜索ddd</p>
+
+6、子选择器
+.food>li{border:1px solid red;}
+7、包含(后代)选择器
+.first  span{color:red;}
+总结：>作用于元素的第一代后代，空格作用于元素的所有后代
+8、通用选择器 * {color:red;}
+9、伪类选择符 a:hover{color:red;}
+10、分组选择符 h1,span{color:red;}
+它相当于下面两行代码：
+h1{color:red;}
+span{color:red;}
+11、继承
+但注意有一些css样式是不具有继承性的。如border:1px solid red;
+
+12、特殊性
+因为浏览器是根据权值来判断使用哪种css样式的，权值高的就使用哪种css样式。
+下面是权值的规则：
+标签的权值为1，类选择符的权值为10，ID选择符的权值最高为100。例如下面的代码：
+p{color:red;} /*权值为1*/
+p span{color:green;} /*权值为1+1=2*/
+.warning{color:white;} /*权值为10*/
+p span.warning{color:purple;} /*权值为1+1+10=12*/
+#footer .note p{color:yellow;} /*权值为100+10+1=111*/
+注意：还有一个权值比较特殊--继承也有权值但很低，有的文献提出它只有0.1，所以可以理解为继承的权值最低。
+
+
+13、层叠就是在html文件中对于同一个元素可以有多个css样式存在，当有相同权重的样式存在时，会根据这些css样式的前后顺序来决定，处于最后面的css样式会被应用。
+
+14、重要性 !important 注意：!important要写在分号的前面
+p{color:red!important;}
+p{color:green;}
+
+15、
+ 文字排版--字体
+body{font-family:"Microsoft Yahei";}
+字号、颜色
+body{font-size:12px;color:#666}
+粗体、斜体、下划线、删除线
+p span{font-weight:bold;}
+p a{font-style:italic;}
+p a{text-decoration:underline;}
+.oldPrice{text-decoration:line-through;}
+缩进
+p{text-indent:2em;} 2个空格
+段落排版--行间距（行高）
+p{line-height:1.5em;}
+段落排版--字间距、字母间距
+单词间距设置：word-spacing:50px;
+段落排版--对齐
+text-align:center;
+text-align:left;
+ text-align:right;
+
+16、元素
+
+常用的块状元素有：
+<div>、<p>、<h1>...<h6>、<ol>、<ul>、<dl>、<table>、<address>、<blockquote> 、<form>
+常用的内联元素有：
+<a>、<span>、<br>、<i>、<em>、<strong>、<label>、<q>、<var>、<cite>、<code>
+常用的内联块状元素有：
+<img>、<input>
+
+设置display:block就是将元素显示为块级元素。
+块级元素特点：
+1、每个块级元素都从新的一行开始，并且其后的元素也另起一行。（真霸道，一个块级元素独占一行）
+2、元素的高度、宽度、行高以及顶和底边距都可设置。
+3、元素宽度在不设置的情况下，是它本身父容器的100%（和父元素的宽度一致），除非设定一个宽度。
+
+
+内联元素特点：
+1、和其他元素都在一行上；
+2、元素的高度、宽度、行高及顶部和底部边距不可设置；
+3、元素的宽度就是它包含的文字或图片的宽度，不可改变。
+小伙伴们你们观查一下右侧代码段，有没有发现一个问题，内联元素之间有一个间距问题，这个问题在本小节的wiki中有介绍，感兴趣的小伙伴可以去查看。
+行内元素之间会产生间隙bug问题的场景：
+1、当行内元素之间有“回车”、“tab”、“空格”时就会出现间隙。
+如下代码：
+<div>
+<a>1</a>
+<a>2</a>
+<span>33333</span>
+<span>4...
+解决方法：
+
+ 1、写在一行，之间不要有空格之类的符号。
+
+<div>
+<a>1</a><a>2</a><span>33333</span><span>44444</span><em>555555</em>
+</div>
+2、使用font-size:0
+
+div{font-size:0;}
+a,span,em{font-size:16px;}
+
+
+
+
+display:inline-block;
+内联块状元素（inline-block）就是同时具备内联元素、块状元素的特点，代码display:inline-block就是将元素设置为内联块状元素。(css2.1新增)，<img>、<input>标签就是这种内联块状标签。
+inline-block元素特点：
+1、和其他元素都在一行上；
+2、元素的高度、宽度、行高以及顶和底边距都可设置。
+
+17、CSS盒模型
