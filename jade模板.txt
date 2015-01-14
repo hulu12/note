@@ -1,0 +1,87 @@
+1、jade可以在命令行中使用
+2、jade index.jade -P（有格式）-w(实时编译) --obj{"course":"jade"}(参数) -O jade.json(传递变量)  生成html文档
+3、jade 语法 . # 分别表示ID和CLASS,可以直接写在元素的后边
+4、混合成段文本
+   p.
+     |1.ss
+     |2.ss
+     strong xxx
+     |3.ss
+   点表示以下是个完整的代码块
+   注意也可以使用原生标签，JADE引擎会自动忽略掉
+ 5、注释// 
+    块状注释//-
+ 6、点的使用 
+     style.
+     	body {color:red}
+
+     script.
+     	var a=1;
+
+7、变量声明
+	- var course="jade"
+	#{course}
+	!{course} 不转义
+	=course
+	!=course 不转义
+	\ 转义符
+
+8、流程
+	- for (var k in jade)
+		p #{jade[k]}
+	- each key,value in jade
+		p #{key}:#{value}
+
+
+	嵌套循环
+
+	unless 是if-else 的相反
+
+	case when defaut
+9、mixins
+	
+	mixin lesson
+		p lesson jade
+	+lesson
+    
+    嵌套 ######
+    内联 ###### if block
+    传递属性#####  ...items  不确定列表
+
+10、模板继承  
+    block desc or content
+    extends
+
+
+    模板包含
+    include html jade css
+
+11、jade api
+  	render
+  	compile
+  	compileFile
+
+12、filters 第三方插件的使用 ，注意只可以传静态文本
+	:markdown
+		this is **jade** [link](http://pang.com)
+	:less
+
+	:coffee
+13、runtime 客户端 
+	预编译
+	jade --client --no-debug runtime.jade
+	会生成个runtime.js
+
+14、html2jade 反编译
+	方式一：html2jade http://pang.com >pang.jade
+	方式二：html2jade pang.html > pang.jade
+	方式三： 写在代码里
+	html2jade.convertDocument(document,callback)
+
+15、jade 弱点
+  可移植性比较差 html2jade
+  调试困难  行号对应不上需要人脑翻译
+  性能不出色 dot 替代
+
+ 初始阶段（开发效率）
+ 稳定阶段（性能和协作成本）
