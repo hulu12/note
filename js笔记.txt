@@ -305,6 +305,8 @@ A&&B 注意: 如果A为假，A && B为假，不会在执行B; 反之，如果A�
 	网页尺寸scrollHeight
 	网页尺寸offsetHeight
 
+	
+
 
 
 

@@ -1,0 +1,395 @@
+1、Spark简化了分布式计算的开发，Spark的计算范式：数据集上的计算，Spark是在数据集的层次上进行分布并行计算，是的，它只认成堆的数据：Spark是一种粗粒度、基于数据集的并行计算框架。
+	将数据载入并构造数据集
+	    在Spark中，这个数据集被称为`RDD` ：弹性分布数据集。
+	     对数据集进行map操作
+	    指定行为：如果一行原始记录包含“包租婆”，该行记录映射为新值1，否则映射为新0 。
+	    对map后的数据集进行collect操作，获得合并的结果
+	 上面的map操作，和前面JavaScript数组的map方法类似，将原始记录映射为新的记录，并返回一个新的RDD。 collect操作提取RDD中的全部数据到本地。
+	Spark操作符
+	Spark提供了80多种操作符对集合进行操作。我们列举常用的一些供你建立一点基本概念， 以便了解Spark可以支持什么：
+
+	变换
+	变换操作总是获得一个新的RDD:
+
+	map(func) : 将原始数据集的每一个记录使用传入的函数func ，映射为一个新的记录，并返回新的RDD。
+	filter(func) : 返回一个新的RDD，仅包含那些符合条件的记录，即func返回true 。
+	flatMap(func) : 和map类似，只是原始记录的一条可能被映射为新的RDD中的多条。
+	union(otherDataset) : 合并两个RDD，返回一个新的RDD 。
+	intersection(otherDataset)：返回一个新的RDD，仅包含两个RDD共有的记录。
+	动作
+	动作操作总是获得一个本地数据，这意味着控制权回到你的程序了:
+
+	reduce(func) : 使用func对RDD的记录进行聚合。
+	collect() : 返回RDD中的所有记录
+	count() : 返回RDD中的记录总数
+2、scala
+
+Spark是用Scala（发音为 /ˈskɑːlə, ˈskeɪlə/）语言开发的。Scala是一种多范式的编程语言，设计意图是要集成 面向对象编程和函数式编程的各种特性。由于不满Java语言复杂的语法，瑞士洛桑联邦理工学院奥德斯基教授带领小组在2001年创建 了Scala语言（任性~）。
+
+Scala
+
+scala运行在Java虚拟机之上，也就是说scala会被编译为和java编译后的class一样的字节码。 这也代表scala和java是可以互相调用并且它们可以联合编译，不过实际上来说scala调用java很容易，而java调用 scala有时会遇到一些问题。
+
+启动scala
+/spark-1.1.1-bin-hadoop2.4/bin/spark-shell
+
+变量var 常量 val
+函数
+def addOne(m: Int): Int = m + 1
+ 
+def sum(n:Int):Int = {    
+        for (i <- 1 to 10)   
+            r = r*i  
+            r  // return r 也可以如果在函数体中不使用return返回函数值，那么最后一个表达式的值就是函数返回值。
+    }   
+
+    超级重要的匿名函数
+Scala支持匿名函数，创建匿名函数不需要使用def关键字，符号=>的左侧定义 参数列表，右侧定义函数体实现。
+
+下面的匿名函数为名为x的变量加1并返回结果：
+
+    scala> (x: Int) => x + 1
+    res2: (Int) => Int = ...
+    函数可以赋值给变量或常量，这是函数式编程的一个特点。下面将匿名函数赋给addOne常量，后续代码中就可以 使用addOne进行调用了：
+    如果匿名函数体实现包含多行表达式，可以使用{}来包围代码，例如：
+
+    scala> { i: Int =>
+          println("hello world")
+          i * 2
+    }
+    res0: (Int) => Int = ...
+
+     对象定义
+Scala支持面向对象编程，使用class定义一个类，在类定义中使用val定义成员变量，用def定义成员方法：
+
+    scala> class Calculator {
+             val brand: String = "HP"
+             def add(m: Int, n: Int): Int = m + n
+           }
+    defined class Calculator
+ 
+使用new 关键字创建一个对象，使用.调用对象的属性和方法：
+
+ 
+    scala> val calc = new Calculator
+    calc: Calculator = Calculator@e75a11
+
+    scala> calc.add(1, 2)
+    res1: Int = 3
+
+    scala> calc.brand
+    res2: String = "HP"
+
+查看版本
+    sc.version
+
+Spark Shell有Scala和Python两个版本。
+集群对象：SparkContext
+当我们启动Spark-Shell后，就自动获得一个SparkContext对象实例，这个对象被存入变量sc。
+
+在提示符下输入：sc ，可以看到sc的类型是org.apache.spark.SparkContext：
+
+    scala> sc
+    res1: org.apache.spark.SparkContext = org.apache.spark.SparkContext@3c5a3436
+SparkContext对象代表整个Spark集群，是Spark框架功能的入口，可以用来在集群中创建RDD、累加器变量和广播变量。 SparkContext对象创建时可以指明连接到哪个集群管理器上，在Spark-Shell启动时，默认连接到本地的集群管理器。
+
+使用SparkContext对象（在Shell里，就是sc变量）的master方法，可以查看当前连接的集群管理器：
+
+    scala> sc.master
+    res10: String = local[*] 
+显示结果表明，我们确实连接到了本地的集群管理器上，*代表不明确指定在每个计算节点上使用的CPU核心数（资源限额）。
+
+分布数据集：RDD
+Spark的核心抽象是一个分布式数据集，被称为弹性分布数据集（RDD） ，代表一个不可变的、可分区、可被并行处理 的成员集合。
+
+RDD对象需要利用SparkContext对象的方法创建，Spark支持从多种来源创建RDD对象，比如：从本地文本文件创建、从Hadoop 的HDFS文件创建、或者通过对其他RDD进行变换获得新的RDD。
+
+下面的示例使用本地Spark目录下的README.md文件创建一个新的RDD：
+
+    scala> val textFile = sc.textFile("README.md")
+    textFile: spark.RDD[String] = spark.MappedRDD@2ee9b6e3 
+我们看到，执行的结果是，返回了一个Spark.RDD类型的变量textFile，RDD是一个模板类，方括号里的String代表 这个RDD对象成员的类型。由于是一个对象，因此值用地址表示：spark.MappedRDD@2ee9b7e3 。
+
+SparkContext对象的textFile方法创建的RDD中，一个成员对应原始文件的一行。我们看到在执行的结果中可以看到返回一个 RDD，成员类型为String，我们将这个对象保存在变量textFile中。
+
+RDD：变换与动作
+RDD的内部实现了分布计算的功能，我们在RDD上执行的操作，是透明地在整个集群上执行的。也就是说，当RDD建立 后，这个RDD就不属于本地了，它在整个集群中有效。当在RDD上执行一个操作，RDD内部需要和集群管理器进行沟通协商。
+
+对一个RDD可以进行两种操作：动作（action）和变换（transformation）。动作总是从集群中取回数据，变换总是获得一个新的RDD，这是两种操作的字面上的差异。
+
+事实上，当在RDD上执行一个变换时，RDD仅仅记录要做的变换，只有当RDD上需要执行一个动作时，RDD才 通过集群管理器启动实质分布计算。
+
+这有点像拍电影，变换操作只是剧本，只有导演喊Action的时候，真正的电影才开始制作。
+
+
+感受动作和变换的区别
+我们用一个例子来直观感受下动作和变换的区别。
+
+下面的例子首先做一个映射变换，然后返回新纪录的条数。map是一个变换，负责将原RDD的每个记录变换到新的RDD，count是一个动作，负责获取这个RDD的记录总数。
+
+先执行map，你应该看到很迅速干净地返回：
+
+    scala> val rdd2=textFile.map(line=>line.lenght)
+    rdd2: org.apache.spark.rdd.RDD[Int] = MappedRDD[52] ...
+再执行count，这会有些不一样：
+
+    
+    scala> rdd2.count()
+    ......
+    res10: Long = 141
+    .....
+当执行map时，我们看到结果很快返回了。但当执行count时，我们可以看到一堆的提示信息，大概的意思就是 和调度器进行了若干沟通才把数据拉回来。
+
+看起来确实这样，变换操作就只是写写剧本，Action才真正开始执行计算任务。
+
+
+3、RDD变换：数据的滤镜
+RDD变换将产生一个新的RDD。下面的例子中，我们执行一个过滤（Filter）变换，将获得一个新的RDD，由原 RDD中符合过滤条件（即：包含单词Spark）的记录成员构成：
+
+    scala> val linesWithSpark = textFile.filter(line => line.contains("Spark"))
+    linesWithSpark: spark.RDD[String] = spark.FilteredRDD@7dd4af09
+变量lineWithSpark现在是一个RDD，由变量textFile这个RDD中所有包含"Spakr"单词的行构成。
+
+由于一个RDD变换总是返回一个新的RDD，因此我们可以将变换和动作使用链式语法串起来。下面的 例子使用了链式语法解决一个具体问题：在文件中有多少行包含单词“Spark”？
+
+    scala> textFile.filter(line => line.contains("Spark")).count() 
+    res3: Long = 15
+这等同于：
+
+    scala> val rdd1 = textFile.filter(line => line.contains("Spark"))
+    ...
+    scala> rdd1.count() 
+    res12: Long = 15
+用链式语法写起来更流畅一些，不过这只是一种口味的倾向而已。
+
+上面语句首先使用map变换，将每一行（成员）映射为一个整数值（单词数量），这获得了一个新的RDD。然后在 这个新的RDD上执行reduce动作，找到（返回）了单词数量最多的行。
+
+count ：计数
+使用count成员函数获得RDD对象的成员总数，返回值为长整型。
+
+语法
+
+    def count(): Long
+返回值
+
+长整型，表示成员总数量。
+
+示例
+
+下面的示例返回文件的总行数（记录数）：
+
+    scala> textFile.count() 
+    res0: Long = 126
+top ：前N个记录
+使用top成员函数获得RDD中的前N个记录，可以指定一个排序函数进行排序比较。 如果不指定排序函数，那么使用默认的Ascii码序进行记录排序。
+
+语法
+
+    def top(num: Int)(implicit ord: Ordering[T]): Array[T]
+参数
+
+num ： Int , 要返回的记录数量
+ord : Ordering[T] , 排序函数
+返回值
+
+包含前N个记录的数组，记录类型为T。
+
+示例
+
+下面的示例返回使用默认排序后的头两个记录
+
+    scala> textFile.top(2)
+    res28:Array[String] = Array(your original work... ,you agree to...)
+
+take：无序采样
+使用take成员函数获得指定数量的记录，返回一个数组。与top不同，take在提取记录 前不进行排序，它仅仅逐分区地提取够指定数量的记录就返回结果。可以将take方法 视为对RDD对象的无序采样。
+
+语法
+
+    def take(num: Int): Array[T]
+参数 num : Int , 要获取的记录数量
+
+返回值
+
+包含指定数量记录的数组，记录类型为T。
+
+示例
+
+下面的示例返回文件中的两行（两个成员）：
+
+    scala> textFile.take(2)
+    res1: Array[String] = Array(# Apache Spark,"")
+
+
+
+  first : 取第一个记录
+使用first成员函数获得RDD中的第一个记录。
+
+语法
+
+    def first(): T
+示例
+
+下面的示例返回文件的第一行（RDD的第一个记录）：
+
+    scala> textFile.first()
+    res1: String = # Apache Spark    
+
+
+max : 取值最大的记录
+使用max成员函数获得值最大的记录，可以指定一个排序函数进行排序比较。默认使用 Ascii码序进行排序。
+
+语法
+
+    def max()(implicit ord: Ordering[T]): T
+参数 ord : Ordering[T] , 排序函数
+
+示例
+
+下面的示例按字符串比较顺序找出最大的行记录：
+
+    scala> textFile.max()
+    res10: String = your original work and that you license the ...
+min : 取值最小的记录
+使用min成员函数获得值最小的记录，可以指定一个排序函数进行排序比较。默认使用 Ascii码序进行排序。
+
+语法
+
+    def min()(implicit ord: Ordering[T]): T
+参数
+
+ord : Ordering[T] , 排序函数
+
+示例
+
+下面的示例按字符串比较顺序找出最小的行记录：
+
+    scala> textFile.min()
+    res 20: String = ""
+
+ reduce : 规约RDD
+使用reduce成员函数对RDD进行规约操作，必须指定一个函数指定规约行为。
+
+语法
+
+    def reduce(f: (T, T) => T): T
+参数 f : 规约函数 , 两个参数分别代表RDD中的两个记录，返回值被RDD用来进行递归计算。
+
+示例
+
+下面的示例使用匿名函数，将所有的记录连接起来构成一个字符串：
+
+    scala> textFile.reduce((a,b)=>a+b)
+    res60:String = #Apache SparkSpake is a fast...
+    
+collect : 收集全部记录
+使用collect成员函数获得RDD中的所有记录，返回一个数组。collect方法 可以视为对RDD对象的一个全采样。
+
+语法
+
+    def collect(): Array[T]
+示例
+
+下面的示例返回RDD中的所有记录：
+
+    scala> textFile.collect()
+    res10: Array[String] = Array(# Apache Spark, "", Spark is a fast ...)    
+
+map : 映射
+映射变换使用一个映射函数对RDD中的每个记录进行变换，每个记录变换后的新值集合构成一个新的RDD。
+
+语法
+
+    def map[U](f: (T) => U)(implicit arg0: ClassTag[U]): RDD[U]
+参数
+
+f : 映射函数 ， 输入参数为原RDD中的一个记录，返回值构成新RDD中的一个记录。
+示例
+
+下面的示例将textFile的每个记录（字符串）变换为其长度值，获得一个新的RDD，然后取回第一个记录查看：
+
+    scala> textFile.map(line=>line.length).first()
+    res13:Int = 14
+
+ filter : 过滤
+过滤变换使用一个筛选函数对RDD中的每个记录进行筛选，只有筛选函数返回真值的记录，才 被选中用来构造新的RDD。
+
+语法
+
+    def filter(f: (T) => Boolean): RDD[T]
+参数
+
+f : 筛选函数 ， 输入参数为原RDD中的一个元素，返回值为True或False 。
+示例
+
+下面的示例仅保留原RDD中字符数多于20个的记录（行），获得一个新的RDD，然后取回第一个 记录查看：
+
+    scala> textFile.filter(line=>line.length>20).first()  
+
+sample : 采样
+采样变换根据给定的随机种子，从RDD中随机地按指定比例选一部分记录，创建新的RDD。采样变换 在机器学习中可用于进行交叉验证。
+
+语法
+
+    def sample(withReplacement: Boolean, fraction: Double, seed: Long = Utils.random.nextLong): RDD[T]
+参数
+
+withReplacement : Boolean , True表示进行替换采样，False表示进行非替换采样
+fraction : Double, 在0~1之间的一个浮点值，表示要采样的记录在全体记录中的比例
+seed ：随机种子
+示例
+
+下面的示例从原RDD中随机选择20%的记录，构造一个新的RDD，然后返回新RDD的记录数：
+
+    scala> textFile.sample(true,0.2).count()
+    res12: Long = 26
+
+
+union : 合并
+合并变换将两个RDD合并为一个新的RDD，重复的记录不会被剔除。
+
+语法
+
+    def union(other: RDD[T]): RDD[T]
+参数
+
+other : 第二个RDD
+示例
+
+下面的示例，首先对textFile这个RDD进行一个每行反转的映射变换，获得一个新的RDD，再 将这个新的RDD和原来的RDD：textFile进行合并，最后我们使用count查看一下总记录数：
+
+    scala> textFile.map(line=>line.reverse).union(textFile).count()
+    res13: Long = 282    
+可以看到，合并后的总记录数是原来的2倍。
+
+
+ntersection : 相交
+相交变换仅取两个RDD共同的记录，构造一个新的RDD。
+
+语法
+
+    def intersection(other: RDD[T]): RDD[T]
+参数
+
+other : 第二个RDD
+示例
+
+下面的示例将每个记录进行逆转后的RDD与原RDD相交，获得一个新的RDD，我们使用collect回收全部 数据以便显示：
+
+    scala> textFile.map(line=>line.reverse).intersection(textFile).collect()
+    res27: Array[String] =Array("   ","")
+
+
+
+distinct : 剔重
+剔重变换剔除RDD中的重复记录，返回一个新的RDD。
+
+语法
+
+    def distinct(): RDD[T]
+示例
+
+下面的示例将RDD中重复的行剔除，并返回新RDD中的记录数：
+
+    scala> textFile.distinct().count()
+    res20: Long =91
