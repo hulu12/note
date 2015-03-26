@@ -33,3 +33,4 @@ snippets
  "eqeqeq":true
 } 
        
+       解决方法是安装IMESupport插件，解决中文输入法不跟谁
