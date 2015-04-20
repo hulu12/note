@@ -1,0 +1,7 @@
+###环境变量
+	1、查看列表 方式1、 ls env:
+				方式2、$env:Path
+	2、修改  $env:Path+=";e:\.myscript"
+		[environment]::SetEnvironmentvariable("Path", ";e:\.myscript", "User")
+
+		[environment]::SetEnvironmentvariable("Path", ";d:\mongo\bin", "User")
