@@ -4,4 +4,6 @@
 	2、修改  $env:Path+=";e:\.myscript"
 		[environment]::SetEnvironmentvariable("Path", ";e:\.myscript", "User")
 
-		[environment]::SetEnvironmentvariable("Path", ";d:\mongo\bin", "User")
+		[environment]::SetEnvironmentvariable("Path", ";e:\.myscript;d:\mongo\bin", "User")
+
+		[environment]::GetEnvironmentvariable("Path", "User")
