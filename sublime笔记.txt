@@ -1,4 +1,4 @@
-综合技巧
+﻿综合技巧
 
 ctrl+n
 ctrl+shift+p sshtml
@@ -23,7 +23,10 @@ snippets
      nettus fetch  迅速下载类库
      sidebarenhancement  右键open in browser
      docblocker
-   
+     IMESupport 解决中文输入不跟随问题
+     HTML5
+     
+     	
 语法及风格校验 jshint.com  
      sublimelinter
      jshint 
